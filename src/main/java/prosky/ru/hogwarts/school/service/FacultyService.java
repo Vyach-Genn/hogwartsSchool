@@ -22,9 +22,8 @@ public class FacultyService {
     }
 
     public Faculty createFaculty(Faculty faculty) {
-        faculty.setId(generatedUserId);
+        faculty.setId(++generatedUserId);
         facultyMap.put(generatedUserId, faculty);
-        generatedUserId++;
         return faculty;
     }
 

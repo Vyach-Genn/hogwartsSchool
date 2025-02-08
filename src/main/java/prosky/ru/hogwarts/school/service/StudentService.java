@@ -14,15 +14,15 @@ public class StudentService {
     private Map<Long, Student> studentMap = new HashMap<>();
     private Long generatedUserId = 0L;
 
-    public StudentService(Map<Long, Student> studentMap) {
+    /*public StudentService(Map<Long, Student> studentMap) {
         this.studentMap = new HashMap<>(studentMap);
         this.generatedUserId = studentMap.keySet().stream()
                 .max(Long::compareTo)
                 .orElse(0L) + 1;
-    }
+    }*/
 
     public Student createStudent(Student student) {
-        student.setId(generatedUserId++);
+        student.setId(++generatedUserId);
         studentMap.put(generatedUserId, student);
         return student;
     }
