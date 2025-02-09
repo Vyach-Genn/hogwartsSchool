@@ -27,9 +27,6 @@ public class FacultyController {
     @GetMapping("{facultyId}")
     public ResponseEntity<Faculty> getFaculty(@PathVariable Long facultyId) {
         Faculty faculty = facultyService.getFacultyById(facultyId);
-        if (faculty == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(faculty);
     }
 
@@ -41,12 +38,9 @@ public class FacultyController {
         return ResponseEntity.ok(Collections.emptyList());
     }
 
-    @PutMapping
-    public ResponseEntity<Faculty> updateFaculty(@RequestBody Faculty faculty) {
-        Faculty updatedFaculty = facultyService.updateFaculty(faculty);
-        if (updatedFaculty == null) {
-            return ResponseEntity.notFound().build();
-        }
+    @PutMapping(value = "{facultyId}")
+    public ResponseEntity<Faculty> updateFaculty(@PathVariable Long facultyId, @RequestBody Faculty faculty) {
+        Faculty updatedFaculty = facultyService.updateFaculty(facultyId, faculty);
         return ResponseEntity.ok(updatedFaculty);
     }
 

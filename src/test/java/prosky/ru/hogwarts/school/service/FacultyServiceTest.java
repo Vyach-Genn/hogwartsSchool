@@ -2,67 +2,92 @@ package prosky.ru.hogwarts.school.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import prosky.ru.hogwarts.school.exception.NotFountException;
 import prosky.ru.hogwarts.school.model.Faculty;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static prosky.ru.hogwarts.school.service.ContansForTest.*;
 
 class FacultyServiceTest {
 
     private FacultyService out;
-    private Map<Long, Faculty> facultyMap;
 
     @BeforeEach
     void setUp() {
-        facultyMap = new HashMap<>(ContansForTest.FACULTY_MAP);
-        out = new FacultyService(facultyMap);
+        out = new FacultyService();
     }
 
     @Test
-    void createFaculty() {
-        Faculty newFaculty = new Faculty(null, "Faculty 4", "Blue");
-
-        Faculty createdFaculty = out.createFaculty(newFaculty);
+    void createFaculty_shouldReturnFacultyWithId() {
+        Faculty createdFaculty = out.createFaculty(GRYFFINDOR);
 
         assertNotNull(createdFaculty);
-        assertEquals("Faculty 4", (createdFaculty.getName()));
+        assertEquals("Gryffindor", (createdFaculty.getName()));
     }
 
     @Test
-    void getFacultyById() {
-        Faculty getedFaculty = out.getFacultyById(2L);
+    void getFacultyById_shouldReturnFaculty() {
+        Faculty createdFaculty = out.createFaculty(GRYFFINDOR);
 
-        assertEquals(facultyMap.get(2L).getName(), getedFaculty.getName());
+        Faculty getedFaculty = out.getFacultyById(createdFaculty.getId());
 
+        assertNotNull(getedFaculty);
+        assertEquals(createdFaculty.getId(), getedFaculty.getId());
+        assertEquals("Gryffindor", getedFaculty.getName());
+
+    }
+
+    @Test
+    void getFacultyById_ThrowsExceptionIfFacultyNotFound() {
+        assertThrows(NotFountException.class, () -> {
+            out.getFacultyById(100L);
+        });
     }
 
     @Test
     void updateFaculty() {
-        Faculty updatedFaculty = new Faculty(2L, "Faculty", "Blue");
+        Faculty createdFaculty = out.createFaculty(GRYFFINDOR);
 
-        Faculty realFaculty = out.updateFaculty(updatedFaculty);
+        Faculty realFaculty = out.updateFaculty(createdFaculty.getId(), SLYTHERIN);
 
         assertNotNull(realFaculty);
-        assertEquals("Faculty", realFaculty.getName());
+        assertEquals("Slytherin", realFaculty.getName());
+    }
+
+    @Test
+    void updateFaculty_shouldThrowNotFoundException() {
+        assertThrows(NotFountException.class, () -> out.updateFaculty(999L, GRYFFINDOR));
     }
 
     @Test
     void deleteFaculty() {
-        out.deleteFaculty(1L);
+        Faculty createdFaculty = out.createFaculty(GRYFFINDOR);
 
-        assertNull(out.getFacultyById(1L));
+        out.deleteFaculty(createdFaculty.getId());
+
+        assertThrows(NotFountException.class, () -> out.getFacultyById(createdFaculty.getId()));
     }
 
     @Test
-    void getAllFacultyByAge() {
+    void deleteFaculty_ThrowsExceptionIfFacultyNotFound() {
+        assertThrows(NotFountException.class, () -> {
+            out.deleteFaculty(999L);
+        });
+    }
+    @Test
+    void getAllFacultyByColor() {
+        out.createFaculty(GRYFFINDOR);
+        out.createFaculty(HUFFLEPUFF);
+        out.createFaculty(SLYTHERIN);
+
         Collection<Faculty> facultys = out.getFacultyByColor("Blue");
 
         assertNotNull(facultys);
         assertEquals(1, facultys.size());
         assertEquals("Slytherin", facultys.iterator().next().getName());
+        assertTrue(facultys.stream().allMatch(f -> f.getColor().equals("Blue")));
     }
 
 }

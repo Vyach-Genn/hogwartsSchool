@@ -1,6 +1,5 @@
 package prosky.ru.hogwarts.school.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import prosky.ru.hogwarts.school.model.Student;
@@ -35,7 +34,7 @@ public class StudentController {
         return ResponseEntity.ok(student);
     }
 
-    @GetMapping("/age/{age}")
+    @GetMapping(value = "/age/{age}")
     public ResponseEntity<Collection<Student>> getAllStudentByAge(@PathVariable Long age) {
         if (age > 0) {
             return ResponseEntity.ok(studentServices.getAllStudentByAge(age));
@@ -43,16 +42,13 @@ public class StudentController {
         return ResponseEntity.ok(Collections.emptyList());
     }
 
-    @PutMapping
-    public ResponseEntity<Student> updateStudent(@RequestBody Student student) {
-        Student updatedStudent = studentServices.updateStudent(student);
-        if (updatedStudent == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+    @PutMapping(value = "{id}")
+    public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Student student) {
+        Student updatedStudent = studentServices.updateStudent(id, student);
         return ResponseEntity.ok(updatedStudent);
     }
 
-    @DeleteMapping("{studentId}")
+    @DeleteMapping(value = "{studentId}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long studentId) {
         studentServices.deleteStudent(studentId);
         return ResponseEntity.noContent().build();

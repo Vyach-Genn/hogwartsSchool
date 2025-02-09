@@ -2,66 +2,92 @@ package prosky.ru.hogwarts.school.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import prosky.ru.hogwarts.school.exception.NotFountException;
 import prosky.ru.hogwarts.school.model.Student;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static prosky.ru.hogwarts.school.service.ContansForTest.*;
 
 class StudentServiceTest {
 
     private StudentService out;
-    private Map<Long, Student> studentMap;
 
     @BeforeEach
     void setUp() {
-        studentMap = new HashMap<>(ContansForTest.STUDENT_MAP);
-        out = new StudentService(studentMap);
+        out = new StudentService();
     }
 
     @Test
-    void createStudent() {
-        Student newStudent = new Student(null, "Student 4", 14);
-
-        Student createdStudent = out.createStudent(newStudent);
+    void createStudent_shouldReturnStudentWithId() {
+        Student createdStudent = out.createStudent(HARRY);
 
         assertNotNull(createdStudent);
-        assertEquals("Student 4", (createdStudent.getName()));
+        assertEquals("Harry", (createdStudent.getName()));
     }
 
     @Test
-    void getStudentById() {
-        Student getedStudent = out.getStudentById(2L);
+    void getStudentById_shouldReturnStudent() {
+        Student createdStudent = out.createStudent(HARRY);
 
-        assertEquals(studentMap.get(2L).getName(), getedStudent.getName());
+        Student getedStudent = out.getStudentById(createdStudent.getId());
 
+        assertNotNull(getedStudent);
+        assertEquals(createdStudent.getId(), getedStudent.getId());
+        assertEquals("Harry", getedStudent.getName());
+
+    }
+
+    @Test
+    void getStudentById_ThrowsExceptionIfStudentNotFound() {
+        assertThrows(NotFountException.class, () -> {
+            out.getStudentById(100L);
+        });
     }
 
     @Test
     void updateStudent() {
-        Student updatedStudent = new Student(2L, "Student", 20);
+        Student createdStudent = out.createStudent(HARRY);
 
-        Student realStudent = out.updateStudent(updatedStudent);
+        Student realStudent = out.updateStudent(createdStudent.getId(), RON);
 
         assertNotNull(realStudent);
-        assertEquals("Student", realStudent.getName());
+        assertEquals("Ron", realStudent.getName());
+    }
+
+    @Test
+    void updateStudent_shouldThrowNotFoundException() {
+        assertThrows(NotFountException.class, () -> out.updateStudent(999L, HARRY));
     }
 
     @Test
     void deleteStudent() {
-        out.deleteStudent(1L);
+        Student createdStudent = out.createStudent(HARRY);
 
-        assertNull(out.getStudentById(1L));
+        out.deleteStudent(createdStudent.getId());
+
+        assertThrows(NotFountException.class, () -> out.getStudentById(createdStudent.getId()));
     }
 
     @Test
-    void getAllStudentByAge() {
-        Collection<Student> students = out.getAllStudentByAge(12L);
+    void deleteStudent_ThrowsExceptionIfStudentNotFound() {
+        assertThrows(NotFountException.class, () -> {
+            out.deleteStudent(999L);
+        });
+    }
 
-        assertNotNull(students);
-        assertEquals(1, students.size());
-        assertEquals("Harry", students.iterator().next().getName());
+    @Test
+    void getAllStudentByColor() {
+        out.createStudent(HARRY);
+        out.createStudent(RON);
+        out.createStudent(HERMIONE);
+
+        Collection<Student> Students = out.getAllStudentByAge(12L);
+
+        assertNotNull(Students);
+        assertEquals(1, Students.size());
+        assertEquals("Harry", Students.iterator().next().getName());
+        assertTrue(Students.stream().allMatch(f -> f.getAge() == 12));
     }
 }
