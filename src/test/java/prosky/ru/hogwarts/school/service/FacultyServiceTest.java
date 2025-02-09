@@ -76,6 +76,7 @@ class FacultyServiceTest {
             out.deleteFaculty(999L);
         });
     }
+
     @Test
     void getAllFacultyByColor() {
         out.createFaculty(GRYFFINDOR);
