@@ -2,88 +2,113 @@ package prosky.ru.hogwarts.school.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import prosky.ru.hogwarts.school.exception.NotFountException;
 import prosky.ru.hogwarts.school.model.Student;
+import prosky.ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static prosky.ru.hogwarts.school.service.ContansForTest.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
+import static prosky.ru.hogwarts.school.service.ContansForTest.HARRY;
+import static prosky.ru.hogwarts.school.service.ContansForTest.RON;
 
 class StudentServiceTest {
 
+    @Mock
+    private StudentRepository studentRepository;
+
+    @InjectMocks
     private StudentService out;
 
     @BeforeEach
     void setUp() {
-        out = new StudentService();
+        openMocks(this);
     }
 
     @Test
     void createStudent_shouldReturnStudentWithId() {
-        Student createdStudent = out.createStudent(HARRY);
+        when(studentRepository.save(HARRY)).thenReturn(HARRY);
 
-        assertNotNull(createdStudent);
-        assertEquals("Harry", (createdStudent.getName()));
+        Student actual = out.createStudent(HARRY);
+
+        assertNotNull(actual);
+        assertEquals("Harry", actual.getName());
+        verify(studentRepository, times(1)).save(HARRY);
     }
 
     @Test
     void getStudentById_shouldReturnStudent() {
-        Student createdStudent = out.createStudent(HARRY);
+        when(studentRepository.existsById(1L)).thenReturn(true);
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(HARRY));
 
-        Student getedStudent = out.getStudentById(createdStudent.getId());
+        Student actual = out.getStudentById(1L);
 
-        assertNotNull(getedStudent);
-        assertEquals(createdStudent.getId(), getedStudent.getId());
-        assertEquals("Harry", getedStudent.getName());
+        assertNotNull(actual);
+        assertEquals(1L, actual.getId());
+        assertEquals("Harry", actual.getName());
+        verify(studentRepository, times(1)).findById(1L);
+        verify(studentRepository, times(1)).existsById(1L);
 
     }
 
     @Test
     void getStudentById_ThrowsExceptionIfStudentNotFound() {
-        assertThrows(NotFountException.class, () -> {
-            out.getStudentById(100L);
-        });
+        when(studentRepository.existsById(10000L)).thenReturn(false);
+
+        assertThrows(NotFountException.class, () -> out.getStudentById(10000L));
+
+        verify(studentRepository, times(1)).existsById(10000L);
     }
 
     @Test
     void updateStudent() {
-        Student createdStudent = out.createStudent(HARRY);
+        when(studentRepository.existsById(1L)).thenReturn(true);
+        when(studentRepository.save(RON)).thenReturn(RON);
 
-        Student realStudent = out.updateStudent(createdStudent.getId(), RON);
+        Student actual = out.updateStudent(1L, RON);
 
-        assertNotNull(realStudent);
-        assertEquals("Ron", realStudent.getName());
+        assertNotNull(actual);
+        assertEquals("Ron", actual.getName());
+        verify(studentRepository, times(1)).existsById(1L);
+        verify(studentRepository, times(1)).save(RON);
     }
 
     @Test
     void updateStudent_shouldThrowNotFoundException() {
+        when(studentRepository.existsById(999L)).thenReturn(false);
+
         assertThrows(NotFountException.class, () -> out.updateStudent(999L, HARRY));
+        verify(studentRepository, times(1)).existsById(999L);
     }
 
     @Test
     void deleteStudent() {
-        Student createdStudent = out.createStudent(HARRY);
+        when(studentRepository.existsById(1L)).thenReturn(true);
 
-        out.deleteStudent(createdStudent.getId());
+        out.deleteStudent(1L);
 
-        assertThrows(NotFountException.class, () -> out.getStudentById(createdStudent.getId()));
+        verify(studentRepository, times(1)).deleteById(1L);
     }
 
     @Test
     void deleteStudent_ThrowsExceptionIfStudentNotFound() {
-        assertThrows(NotFountException.class, () -> {
-            out.deleteStudent(999L);
-        });
+        when(studentRepository.existsById(999L)).thenReturn(false);
+
+        assertThrows(NotFountException.class, () -> out.deleteStudent(999L));
+        verify(studentRepository, times(1)).existsById(999L);
     }
 
     @Test
     void getAllStudentByColor() {
-        out.createStudent(HARRY);
-        out.createStudent(RON);
-        out.createStudent(HERMIONE);
+        when(studentRepository.findByAge(12)).thenReturn(List.of(HARRY));
 
-        Collection<Student> Students = out.getAllStudentByAge(12L);
+        Collection<Student> Students = out.findStudentByAge(12);
 
         assertNotNull(Students);
         assertEquals(1, Students.size());

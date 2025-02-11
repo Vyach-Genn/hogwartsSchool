@@ -1,23 +1,20 @@
 package prosky.ru.hogwarts.school.controller;
 
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import prosky.ru.hogwarts.school.model.Student;
 import prosky.ru.hogwarts.school.service.StudentService;
 
 import java.util.Collection;
-import java.util.Collections;
 
 @RequestMapping("student")
 @RestController
+@AllArgsConstructor
 public class StudentController {
 
 
     private final StudentService studentServices;
-
-    public StudentController(StudentService studentServices) {
-        this.studentServices = studentServices;
-    }
 
     @PostMapping
     public ResponseEntity<Student> createStudent(@RequestBody Student student) {
@@ -28,18 +25,12 @@ public class StudentController {
     @GetMapping("{id}")
     public ResponseEntity<Student> getStudent(@PathVariable Long id) {
         Student student = studentServices.getStudentById(id);
-        if (student == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(student);
     }
 
     @GetMapping(value = "/age/{age}")
-    public ResponseEntity<Collection<Student>> getAllStudentByAge(@PathVariable Long age) {
-        if (age > 0) {
-            return ResponseEntity.ok(studentServices.getAllStudentByAge(age));
-        }
-        return ResponseEntity.ok(Collections.emptyList());
+    public ResponseEntity<Collection<Student>> getAllStudentByAge(@PathVariable int age) {
+        return ResponseEntity.ok(studentServices.findStudentByAge(age));
     }
 
     @PutMapping(value = "{id}")
@@ -50,6 +41,7 @@ public class StudentController {
 
     @DeleteMapping(value = "{studentId}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long studentId) {
+        studentServices.checkStudentExists(studentId);
         studentServices.deleteStudent(studentId);
         return ResponseEntity.noContent().build();
     }

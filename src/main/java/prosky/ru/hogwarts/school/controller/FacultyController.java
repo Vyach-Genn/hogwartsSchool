@@ -1,22 +1,19 @@
 package prosky.ru.hogwarts.school.controller;
 
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import prosky.ru.hogwarts.school.model.Faculty;
 import prosky.ru.hogwarts.school.service.FacultyService;
 
 import java.util.Collection;
-import java.util.Collections;
 
 @RequestMapping("faculty")
 @RestController
+@AllArgsConstructor
 public class FacultyController {
 
     private final FacultyService facultyService;
-
-    public FacultyController(FacultyService facultyService) {
-        this.facultyService = facultyService;
-    }
 
     @PostMapping
     public ResponseEntity<Faculty> createFaculty(@RequestBody Faculty faculty) {
@@ -32,10 +29,7 @@ public class FacultyController {
 
     @GetMapping("/color/{color}")
     public ResponseEntity<Collection<Faculty>> getAllFacultyByColor(@PathVariable String color) {
-        if (color != null && !color.isBlank()) {
-            return ResponseEntity.ok(facultyService.getFacultyByColor(color));
-        }
-        return ResponseEntity.ok(Collections.emptyList());
+        return ResponseEntity.ok(facultyService.findByColor(color));
     }
 
     @PutMapping(value = "{facultyId}")
@@ -46,6 +40,7 @@ public class FacultyController {
 
     @DeleteMapping("{facultyId}")
     public ResponseEntity<Void> deleteFaculty(@PathVariable Long facultyId) {
+        facultyService.checkFacultyExists(facultyId);
         facultyService.deleteFaculty(facultyId);
         return ResponseEntity.noContent().build();
     }

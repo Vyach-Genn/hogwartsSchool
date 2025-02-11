@@ -1,52 +1,46 @@
 package prosky.ru.hogwarts.school.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import prosky.ru.hogwarts.school.exception.NotFountException;
 import prosky.ru.hogwarts.school.model.Student;
+import prosky.ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
+@AllArgsConstructor
 @Service
 public class StudentService {
 
-    private final Map<Long, Student> studentMap = new HashMap<>();
-    private Long generatedUserId = 0L;
-
+    private final StudentRepository studentRepository;
 
     public Student createStudent(Student student) {
-        student.setId(++generatedUserId);
-        studentMap.put(generatedUserId, student);
+        studentRepository.save(student);
         return student;
     }
 
     public Student getStudentById(Long id) {
         checkStudentExists(id);
-        return studentMap.get(id);
+        return studentRepository.findById(id).get();
     }
 
     public Student updateStudent(Long id, Student student) {
         checkStudentExists(id);
         student.setId(id);
-        studentMap.put(id, student);
-        return student;
+        return studentRepository.save(student);
     }
 
     public void deleteStudent(Long studentId) {
         checkStudentExists(studentId);
-        studentMap.remove(studentId);
+        studentRepository.deleteById(studentId);
     }
 
-    public Collection<Student> getAllStudentByAge(Long studentAge) {
-        return studentMap.values().stream()
-                .filter(student -> student.getAge() == studentAge)
-                .collect(Collectors.toList());
+    public Collection<Student> findStudentByAge(int studentAge) {
+        return studentRepository.findByAge(studentAge);
     }
 
     public void checkStudentExists(Long id) {
-        if (!studentMap.containsKey(id)) {
+        if (!studentRepository.existsById(id)) {
             throw new NotFountException("Error: Студент с id " + id + " не найден");
         }
     }

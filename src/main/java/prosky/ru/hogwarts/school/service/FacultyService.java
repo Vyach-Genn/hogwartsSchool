@@ -1,53 +1,48 @@
 package prosky.ru.hogwarts.school.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import prosky.ru.hogwarts.school.exception.NotFountException;
 import prosky.ru.hogwarts.school.model.Faculty;
+import prosky.ru.hogwarts.school.repository.FacultyRepository;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class FacultyService {
 
-    private final Map<Long, Faculty> facultyMap = new HashMap<>();
-    private Long generatedUserId = 0L;
+    FacultyRepository facultyRepository;
 
 
     public Faculty createFaculty(Faculty faculty) {
-        faculty.setId(++generatedUserId);
-        facultyMap.put(generatedUserId, faculty);
+        facultyRepository.save(faculty);
         return faculty;
     }
 
     public Faculty getFacultyById(Long id) {
         checkFacultyExists(id);
-        return facultyMap.get(id);
+        return facultyRepository.findById(id).get();
     }
 
     public Faculty updateFaculty(Long id, Faculty faculty) {
         checkFacultyExists(id);
         faculty.setId(id);
-        facultyMap.put(id, faculty);
-        return faculty;
+        return facultyRepository.save(faculty);
     }
 
     public void deleteFaculty(Long facultyId) {
         checkFacultyExists(facultyId);
-        facultyMap.remove(facultyId);
+        facultyRepository.deleteById(facultyId);
     }
 
-    public Collection<Faculty> getFacultyByColor(String color) {
-        return facultyMap.values().stream()
-                .filter(faculty -> faculty.getColor().equals(color))
-                .collect(Collectors.toList());
+    public List<Faculty> findByColor(String color) {
+        return facultyRepository.findByColor(color);
     }
 
     public void checkFacultyExists(Long id) {
-        if (!facultyMap.containsKey(id)) {
-            throw new NotFountException("Error: Факултет с id " + id + " не найден");
+        if (!facultyRepository.existsById(id)) {
+            throw new NotFountException("Error: Факультет с id " + id + " не найден");
         }
     }
 }

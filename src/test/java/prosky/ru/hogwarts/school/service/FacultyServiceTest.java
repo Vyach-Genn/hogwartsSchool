@@ -2,88 +2,113 @@ package prosky.ru.hogwarts.school.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import prosky.ru.hogwarts.school.exception.NotFountException;
 import prosky.ru.hogwarts.school.model.Faculty;
+import prosky.ru.hogwarts.school.repository.FacultyRepository;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static prosky.ru.hogwarts.school.service.ContansForTest.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
+import static prosky.ru.hogwarts.school.service.ContansForTest.GRYFFINDOR;
+import static prosky.ru.hogwarts.school.service.ContansForTest.SLYTHERIN;
 
 class FacultyServiceTest {
 
+    @Mock
+    private FacultyRepository facultyRepository;
+
+    @InjectMocks
     private FacultyService out;
 
     @BeforeEach
     void setUp() {
-        out = new FacultyService();
+        openMocks(this);
     }
 
     @Test
     void createFaculty_shouldReturnFacultyWithId() {
-        Faculty createdFaculty = out.createFaculty(GRYFFINDOR);
+        when(facultyRepository.save(GRYFFINDOR)).thenReturn(GRYFFINDOR);
 
-        assertNotNull(createdFaculty);
-        assertEquals("Gryffindor", (createdFaculty.getName()));
+        Faculty actual = out.createFaculty(GRYFFINDOR);
+
+        assertNotNull(actual);
+        assertEquals("Gryffindor", actual.getName());
+        verify(facultyRepository, times(1)).save(GRYFFINDOR);
     }
 
     @Test
     void getFacultyById_shouldReturnFaculty() {
-        Faculty createdFaculty = out.createFaculty(GRYFFINDOR);
+        when(facultyRepository.existsById(1L)).thenReturn(true);
+        when(facultyRepository.findById(1L)).thenReturn(Optional.of(GRYFFINDOR));
 
-        Faculty getedFaculty = out.getFacultyById(createdFaculty.getId());
+        Faculty actual = out.getFacultyById(1L);
 
-        assertNotNull(getedFaculty);
-        assertEquals(createdFaculty.getId(), getedFaculty.getId());
-        assertEquals("Gryffindor", getedFaculty.getName());
+        assertNotNull(actual);
+        assertEquals(1L, actual.getId());
+        assertEquals("Gryffindor", actual.getName());
+        verify(facultyRepository, times(1)).findById(1L);
+        verify(facultyRepository, times(1)).existsById(1L);
 
     }
 
     @Test
     void getFacultyById_ThrowsExceptionIfFacultyNotFound() {
-        assertThrows(NotFountException.class, () -> {
-            out.getFacultyById(100L);
-        });
+        when(facultyRepository.existsById(10000L)).thenReturn(false);
+
+        assertThrows(NotFountException.class, () -> out.getFacultyById(10000L));
+
+        verify(facultyRepository, times(1)).existsById(10000L);
     }
 
     @Test
     void updateFaculty() {
-        Faculty createdFaculty = out.createFaculty(GRYFFINDOR);
+        when(facultyRepository.existsById(1L)).thenReturn(true);
+        when(facultyRepository.save(SLYTHERIN)).thenReturn(SLYTHERIN);
 
-        Faculty realFaculty = out.updateFaculty(createdFaculty.getId(), SLYTHERIN);
+        Faculty actual = out.updateFaculty(1L, SLYTHERIN);
 
-        assertNotNull(realFaculty);
-        assertEquals("Slytherin", realFaculty.getName());
+        assertNotNull(actual);
+        assertEquals("Slytherin", actual.getName());
+        verify(facultyRepository, times(1)).existsById(1L);
+        verify(facultyRepository, times(1)).save(SLYTHERIN);
     }
 
     @Test
     void updateFaculty_shouldThrowNotFoundException() {
+        when(facultyRepository.existsById(999L)).thenReturn(false);
+
         assertThrows(NotFountException.class, () -> out.updateFaculty(999L, GRYFFINDOR));
+        verify(facultyRepository, times(1)).existsById(999L);
     }
 
     @Test
     void deleteFaculty() {
-        Faculty createdFaculty = out.createFaculty(GRYFFINDOR);
+        when(facultyRepository.existsById(1L)).thenReturn(true);
 
-        out.deleteFaculty(createdFaculty.getId());
+        out.deleteFaculty(1L);
 
-        assertThrows(NotFountException.class, () -> out.getFacultyById(createdFaculty.getId()));
+        verify(facultyRepository, times(1)).deleteById(1L);
     }
 
     @Test
     void deleteFaculty_ThrowsExceptionIfFacultyNotFound() {
-        assertThrows(NotFountException.class, () -> {
-            out.deleteFaculty(999L);
-        });
+        when(facultyRepository.existsById(999L)).thenReturn(false);
+
+        assertThrows(NotFountException.class, () -> out.deleteFaculty(999L));
+        verify(facultyRepository, times(1)).existsById(999L);
     }
 
     @Test
     void getAllFacultyByColor() {
-        out.createFaculty(GRYFFINDOR);
-        out.createFaculty(HUFFLEPUFF);
-        out.createFaculty(SLYTHERIN);
+        when(facultyRepository.findByColor("Blue")).thenReturn(List.of(SLYTHERIN));
 
-        Collection<Faculty> facultys = out.getFacultyByColor("Blue");
+        Collection<Faculty> facultys = out.findByColor("Blue");
 
         assertNotNull(facultys);
         assertEquals(1, facultys.size());
