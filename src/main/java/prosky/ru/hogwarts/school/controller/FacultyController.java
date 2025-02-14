@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import prosky.ru.hogwarts.school.model.Faculty;
+import prosky.ru.hogwarts.school.model.Student;
+import prosky.ru.hogwarts.school.repository.FacultyRepository;
 import prosky.ru.hogwarts.school.service.FacultyService;
 
-import java.util.Collection;
+import java.util.Set;
 
 @RequestMapping("faculty")
 @RestController
@@ -14,6 +16,7 @@ import java.util.Collection;
 public class FacultyController {
 
     private final FacultyService facultyService;
+    private final FacultyRepository facultyRepository;
 
     @PostMapping
     public ResponseEntity<Faculty> createFaculty(@RequestBody Faculty faculty) {
@@ -21,15 +24,26 @@ public class FacultyController {
         return ResponseEntity.ok(createdFaculty);
     }
 
-    @GetMapping("{facultyId}")
-    public ResponseEntity<Faculty> getFaculty(@PathVariable Long facultyId) {
-        Faculty faculty = facultyService.getFacultyById(facultyId);
-        return ResponseEntity.ok(faculty);
+    @GetMapping()
+    public ResponseEntity getFaculty(@RequestParam(required = false) Long facultyId,
+                                     @RequestParam(required = false) String color,
+                                     @RequestParam(required = false) String name) {
+        if (facultyId != null) {
+            return ResponseEntity.ok(facultyService.getFacultyById(facultyId));
+        }
+        if (color != null && !color.isBlank()) {
+            return ResponseEntity.ok(facultyService.findByColor(color));
+        }
+        if (name != null && !name.isBlank()) {
+            return ResponseEntity.ok(facultyService.findByName(name));
+        }
+        return ResponseEntity.ok(facultyService.getAllFaculty());
     }
 
-    @GetMapping("/color/{color}")
-    public ResponseEntity<Collection<Faculty>> getAllFacultyByColor(@PathVariable String color) {
-        return ResponseEntity.ok(facultyService.findByColor(color));
+    @GetMapping("{facultyId}/students")
+    public ResponseEntity<Set<Student>> getStudentByFaculty(@PathVariable Long facultyId) {
+        Set<Student> students = facultyService.getStudentsByFaculty(facultyId);
+        return ResponseEntity.ok(students);
     }
 
     @PutMapping(value = "{facultyId}")
@@ -40,7 +54,6 @@ public class FacultyController {
 
     @DeleteMapping("{facultyId}")
     public ResponseEntity<Void> deleteFaculty(@PathVariable Long facultyId) {
-        facultyService.checkFacultyExists(facultyId);
         facultyService.deleteFaculty(facultyId);
         return ResponseEntity.noContent().build();
     }

@@ -3,10 +3,9 @@ package prosky.ru.hogwarts.school.controller;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import prosky.ru.hogwarts.school.model.Faculty;
 import prosky.ru.hogwarts.school.model.Student;
 import prosky.ru.hogwarts.school.service.StudentService;
-
-import java.util.Collection;
 
 @RequestMapping("student")
 @RestController
@@ -14,35 +13,46 @@ import java.util.Collection;
 public class StudentController {
 
 
-    private final StudentService studentServices;
+    private final StudentService studentService;
 
     @PostMapping
     public ResponseEntity<Student> createStudent(@RequestBody Student student) {
-        Student createdStudent = studentServices.createStudent(student);
+        Student createdStudent = studentService.createStudent(student);
         return ResponseEntity.ok(createdStudent);
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<Student> getStudent(@PathVariable Long id) {
-        Student student = studentServices.getStudentById(id);
-        return ResponseEntity.ok(student);
+    @GetMapping
+    public ResponseEntity getStudent(@RequestParam(required = false) Long id,
+                                     @RequestParam(required = false) Integer age,
+                                     @RequestParam(required = false) Integer minAge,
+                                     @RequestParam(required = false) Integer maxAge) {
+        if (id != null) {
+            return ResponseEntity.ok(studentService.getStudentById(id));
+        }
+        if (age != null) {
+            return ResponseEntity.ok(studentService.findStudentByAge(age));
+        }
+        if (minAge != null && maxAge != null && minAge > 0 && maxAge > minAge) {
+            return ResponseEntity.ok(studentService.findByMinAgeAndMaxAge(minAge, maxAge));
+        }
+        return ResponseEntity.ok(studentService.getAllStudent());
     }
 
-    @GetMapping(value = "/age/{age}")
-    public ResponseEntity<Collection<Student>> getAllStudentByAge(@PathVariable int age) {
-        return ResponseEntity.ok(studentServices.findStudentByAge(age));
+    @GetMapping("{studentId}/faculty")
+    public ResponseEntity<Faculty> getFacultyByStudentId(@PathVariable Long studentId) {
+        Faculty faculty = studentService.getFacultyByStudentId(studentId);
+        return ResponseEntity.ok(faculty);
     }
 
     @PutMapping(value = "{id}")
     public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Student student) {
-        Student updatedStudent = studentServices.updateStudent(id, student);
+        Student updatedStudent = studentService.updateStudent(id, student);
         return ResponseEntity.ok(updatedStudent);
     }
 
     @DeleteMapping(value = "{studentId}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long studentId) {
-        studentServices.checkStudentExists(studentId);
-        studentServices.deleteStudent(studentId);
+        studentService.deleteStudent(studentId);
         return ResponseEntity.noContent().build();
     }
 }

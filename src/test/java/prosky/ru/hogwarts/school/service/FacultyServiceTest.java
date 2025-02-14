@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import prosky.ru.hogwarts.school.exception.NotFountException;
+import prosky.ru.hogwarts.school.exception.NotFoundException;
 import prosky.ru.hogwarts.school.model.Faculty;
 import prosky.ru.hogwarts.school.repository.FacultyRepository;
 
@@ -61,7 +61,7 @@ class FacultyServiceTest {
     void getFacultyById_ThrowsExceptionIfFacultyNotFound() {
         when(facultyRepository.existsById(10000L)).thenReturn(false);
 
-        assertThrows(NotFountException.class, () -> out.getFacultyById(10000L));
+        assertThrows(NotFoundException.class, () -> out.getFacultyById(10000L));
 
         verify(facultyRepository, times(1)).existsById(10000L);
     }
@@ -83,7 +83,7 @@ class FacultyServiceTest {
     void updateFaculty_shouldThrowNotFoundException() {
         when(facultyRepository.existsById(999L)).thenReturn(false);
 
-        assertThrows(NotFountException.class, () -> out.updateFaculty(999L, GRYFFINDOR));
+        assertThrows(NotFoundException.class, () -> out.updateFaculty(999L, GRYFFINDOR));
         verify(facultyRepository, times(1)).existsById(999L);
     }
 
@@ -100,13 +100,13 @@ class FacultyServiceTest {
     void deleteFaculty_ThrowsExceptionIfFacultyNotFound() {
         when(facultyRepository.existsById(999L)).thenReturn(false);
 
-        assertThrows(NotFountException.class, () -> out.deleteFaculty(999L));
+        assertThrows(NotFoundException.class, () -> out.deleteFaculty(999L));
         verify(facultyRepository, times(1)).existsById(999L);
     }
 
     @Test
     void getAllFacultyByColor() {
-        when(facultyRepository.findByColor("Blue")).thenReturn(List.of(SLYTHERIN));
+        when(facultyRepository.findByColorIgnoreCase("Blue")).thenReturn(List.of(SLYTHERIN));
 
         Collection<Faculty> facultys = out.findByColor("Blue");
 

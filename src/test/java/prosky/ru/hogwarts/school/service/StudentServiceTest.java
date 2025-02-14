@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import prosky.ru.hogwarts.school.exception.NotFountException;
+import prosky.ru.hogwarts.school.exception.NotFoundException;
 import prosky.ru.hogwarts.school.model.Student;
 import prosky.ru.hogwarts.school.repository.StudentRepository;
 
@@ -61,7 +61,7 @@ class StudentServiceTest {
     void getStudentById_ThrowsExceptionIfStudentNotFound() {
         when(studentRepository.existsById(10000L)).thenReturn(false);
 
-        assertThrows(NotFountException.class, () -> out.getStudentById(10000L));
+        assertThrows(NotFoundException.class, () -> out.getStudentById(10000L));
 
         verify(studentRepository, times(1)).existsById(10000L);
     }
@@ -83,7 +83,7 @@ class StudentServiceTest {
     void updateStudent_shouldThrowNotFoundException() {
         when(studentRepository.existsById(999L)).thenReturn(false);
 
-        assertThrows(NotFountException.class, () -> out.updateStudent(999L, HARRY));
+        assertThrows(NotFoundException.class, () -> out.updateStudent(999L, HARRY));
         verify(studentRepository, times(1)).existsById(999L);
     }
 
@@ -100,7 +100,7 @@ class StudentServiceTest {
     void deleteStudent_ThrowsExceptionIfStudentNotFound() {
         when(studentRepository.existsById(999L)).thenReturn(false);
 
-        assertThrows(NotFountException.class, () -> out.deleteStudent(999L));
+        assertThrows(NotFoundException.class, () -> out.deleteStudent(999L));
         verify(studentRepository, times(1)).existsById(999L);
     }
 

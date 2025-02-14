@@ -2,7 +2,8 @@ package prosky.ru.hogwarts.school.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import prosky.ru.hogwarts.school.exception.NotFountException;
+import prosky.ru.hogwarts.school.exception.NotFoundException;
+import prosky.ru.hogwarts.school.model.Faculty;
 import prosky.ru.hogwarts.school.model.Student;
 import prosky.ru.hogwarts.school.repository.StudentRepository;
 
@@ -39,9 +40,27 @@ public class StudentService {
         return studentRepository.findByAge(studentAge);
     }
 
+    public Collection<Student> findByMinAgeAndMaxAge(int minAge, int maxAge) {
+        return studentRepository.findByAgeBetween(minAge, maxAge);
+    }
+
+    public Collection<Student> getAllStudent() {
+        return studentRepository.findAll();
+    }
+
+    public Faculty getFacultyByStudentId(Long studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new NotFoundException("Студент с id " + studentId + " не найден"));
+
+        Faculty faculty = student.getFaculty();
+        faculty.setStudentName(student.getName());
+
+        return faculty;
+    }
+
     public void checkStudentExists(Long id) {
         if (!studentRepository.existsById(id)) {
-            throw new NotFountException("Error: Студент с id " + id + " не найден");
+            throw new NotFoundException("Error: Студент с id " + id + " не найден");
         }
     }
 }
