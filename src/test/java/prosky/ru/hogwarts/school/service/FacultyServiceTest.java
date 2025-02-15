@@ -6,17 +6,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import prosky.ru.hogwarts.school.exception.NotFoundException;
 import prosky.ru.hogwarts.school.model.Faculty;
+import prosky.ru.hogwarts.school.model.Student;
 import prosky.ru.hogwarts.school.repository.FacultyRepository;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
-import static prosky.ru.hogwarts.school.service.ContansForTest.GRYFFINDOR;
-import static prosky.ru.hogwarts.school.service.ContansForTest.SLYTHERIN;
+import static prosky.ru.hogwarts.school.service.ContansForTest.*;
 
 class FacultyServiceTest {
 
@@ -114,6 +115,17 @@ class FacultyServiceTest {
         assertEquals(1, facultys.size());
         assertEquals("Slytherin", facultys.iterator().next().getName());
         assertTrue(facultys.stream().allMatch(f -> f.getColor().equals("Blue")));
+    }
+
+    @Test
+    void GetStudentsByFaculty_shouldReturnStudentByFaculty() {
+        Long facultyId = 1L;
+        when(facultyRepository.findStudentsByFacultyId(facultyId)).thenReturn(GRYFFINDOR_SET_STUDENT);
+
+        Set<Student> actual = out.getStudentsByFaculty(facultyId);
+
+        assertEquals(GRYFFINDOR_SET_STUDENT, actual);
+        verify(facultyRepository, times(1)).findStudentsByFacultyId(facultyId);
     }
 
 }
