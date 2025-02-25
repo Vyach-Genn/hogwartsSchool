@@ -21,7 +21,7 @@ public class Student {
     private String name;
     private int age;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "faculty_id")
     @JsonBackReference
     private Faculty faculty;

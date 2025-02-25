@@ -12,12 +12,11 @@ public class ContansForTest {
 
     public static final Faculty GRYFFINDOR = new Faculty(1L, "Gryffindor", "Red");
     public static final Faculty SLYTHERIN = new Faculty(2L, "Slytherin", "Blue");
+    public static final Set<Student> GRYFFINDOR_SET_STUDENT = Set.of(HARRY, RON);
 
-    static{
+    static {
         HARRY.setFaculty(GRYFFINDOR);
         RON.setFaculty(GRYFFINDOR);
     }
-
-    public static final Set<Student> GRYFFINDOR_SET_STUDENT = Set.of(HARRY, RON);
 
 }
