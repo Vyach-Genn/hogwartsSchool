@@ -47,6 +47,8 @@ class SchoolHogwartsFacultyWebMvcApplicationTest {
         userObject.put("name", faculty.getName());
         userObject.put("color", faculty.getColor());
 
+        when(facultyRepository.save(any(Faculty.class))).thenReturn(faculty);
+        when(facultyRepository.findById(any(Long.class))).thenReturn(Optional.of(faculty));
 
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/faculty")
