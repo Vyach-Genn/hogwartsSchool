@@ -1,6 +1,5 @@
 package prosky.ru.hogwarts.school.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -20,7 +19,7 @@ public class Faculty {
 
     @Schema(hidden = true)
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
     private String name;
     private String color;
@@ -31,7 +30,7 @@ public class Faculty {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "faculty")
-    @JsonIgnore
+    //@JsonIgnore
     private Set<Student> students;
 
     public Faculty(Long id, String name, String color) {
