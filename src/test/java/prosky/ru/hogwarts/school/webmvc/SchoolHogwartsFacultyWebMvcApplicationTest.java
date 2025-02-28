@@ -116,7 +116,7 @@ class SchoolHogwartsFacultyWebMvcApplicationTest {
         JSONObject updatedUserObject = new JSONObject();
         updatedUserObject.put("id", id);
         updatedUserObject.put("name", updatedName);
-        updatedUserObject.put("age", updatedColor);
+        updatedUserObject.put("color", updatedColor);
 
         Faculty updatedFaculty = new Faculty(id, updatedName, updatedColor);
 
