@@ -1,0 +1,58 @@
+package prosky.ru.hogwarts.school.controller;
+
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import prosky.ru.hogwarts.school.model.Faculty;
+import prosky.ru.hogwarts.school.model.Student;
+import prosky.ru.hogwarts.school.service.StudentService;
+
+@RequestMapping("student")
+@RestController
+@AllArgsConstructor
+public class StudentController {
+
+
+    private final StudentService studentService;
+
+    @PostMapping
+    public ResponseEntity<Student> createStudent(@RequestBody Student student) {
+        Student createdStudent = studentService.createStudent(student);
+        return ResponseEntity.ok(createdStudent);
+    }
+
+    @GetMapping
+    public ResponseEntity getStudent(@RequestParam(required = false) Long id,
+                                     @RequestParam(required = false) Integer age,
+                                     @RequestParam(required = false) Integer minAge,
+                                     @RequestParam(required = false) Integer maxAge) {
+        if (id != null) {
+            return ResponseEntity.ok(studentService.getStudentById(id));
+        }
+        if (age != null) {
+            return ResponseEntity.ok(studentService.findStudentByAge(age));
+        }
+        if (minAge != null && maxAge != null && minAge > 0 && maxAge > minAge) {
+            return ResponseEntity.ok(studentService.findByMinAgeAndMaxAge(minAge, maxAge));
+        }
+        return ResponseEntity.ok(studentService.getAllStudent());
+    }
+
+    @GetMapping("{studentId}/faculty")
+    public ResponseEntity<Faculty> getFacultyByStudentId(@PathVariable Long studentId) {
+        Faculty faculty = studentService.getFacultyByStudentId(studentId);
+        return ResponseEntity.ok(faculty);
+    }
+
+    @PutMapping(value = "{id}")
+    public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Student student) {
+        Student updatedStudent = studentService.updateStudent(id, student);
+        return ResponseEntity.ok(updatedStudent);
+    }
+
+    @DeleteMapping(value = "{studentId}")
+    public ResponseEntity<Void> deleteStudent(@PathVariable Long studentId) {
+        studentService.deleteStudent(studentId);
+        return ResponseEntity.noContent().build();
+    }
+}
