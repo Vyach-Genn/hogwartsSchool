@@ -16,7 +16,7 @@ public class Student {
 
     @Schema(hidden = true)
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private int age;

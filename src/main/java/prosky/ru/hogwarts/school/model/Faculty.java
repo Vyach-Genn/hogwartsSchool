@@ -19,7 +19,7 @@ public class Faculty {
 
     @Schema(hidden = true)
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String color;
@@ -30,7 +30,6 @@ public class Faculty {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "faculty")
-    //@JsonIgnore
     private Set<Student> students;
 
     public Faculty(Long id, String name, String color) {

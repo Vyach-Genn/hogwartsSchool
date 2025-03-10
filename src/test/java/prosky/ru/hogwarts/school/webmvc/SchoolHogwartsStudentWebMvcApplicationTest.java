@@ -164,4 +164,48 @@ class SchoolHogwartsStudentWebMvcApplicationTest {
                 .andExpect(jsonPath("$[1].age").value(22));
     }
 
+    @Test
+    void testCountAllStudents() throws Exception {
+        when(studentService.getCountAllStudents()).thenReturn(20L);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student/count")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(20L));
+    }
+
+    @Test
+    void testgetAverageAgeOfAllStudents() throws Exception {
+        when(studentService.getAverageAgeOfAllStudents()).thenReturn(9.0);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student/average")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(9.0));
+    }
+
+    @Test
+    void testGetTop5ByOrderByIdDesc() throws Exception {
+        List<Student> students = List.of(
+                new Student(1L, "Harry Potter", 11),
+                new Student(2L, "Hermione Granger", 11),
+                new Student(3L, "Ron Weasley", 11),
+                new Student(4L, "Draco Malfoy", 11),
+                new Student(5L, "Neville Longbottom", 11)
+        );
+
+        when(studentService.getTop5ByOrderById()).thenReturn(students);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/student/limit_5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(5))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("Harry Potter"))
+                .andExpect(jsonPath("$[1].name").value("Hermione Granger"))
+                .andExpect(jsonPath("$[4].name").value("Neville Longbottom"));
+    }
 }

@@ -1,7 +1,10 @@
 package prosky.ru.hogwarts.school.controller;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,21 +15,20 @@ import prosky.ru.hogwarts.school.model.Avatar;
 import prosky.ru.hogwarts.school.service.AvatarService;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("student")
+@RequestMapping("avatar")
 public class AvatarController {
 
     private final AvatarService avatarService;
 
     @PostMapping(value = "/{studentId}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadAvatar(@PathVariable Long studentId,
-                                               @RequestParam MultipartFile avatar) throws IOException {
+    public ResponseEntity<String> uploadAvatar(
+            @PathVariable Long studentId,
+            @RequestParam MultipartFile avatar) throws IOException {
         if (avatar.getSize() >= 1024 * 300) {
             return ResponseEntity.badRequest().body("Слишком большой файл");
         }
@@ -35,17 +37,16 @@ public class AvatarController {
     }
 
     @GetMapping(value = "/{studentId}/avatar")
-    public void getAvatar(@PathVariable Long studentId, HttpServletResponse response) throws IOException {
+    public ResponseEntity<Resource> getAvatar(@PathVariable Long studentId) throws IOException {
         Avatar avatar = avatarService.findAvatar(studentId);
         Path path = Path.of(avatar.getFilePath());
 
-        try (InputStream is = Files.newInputStream(path);
-             OutputStream os = response.getOutputStream()) {
-            response.setStatus(200);
-            response.setContentType(avatar.getMediaType());
-            response.setContentLength((int) avatar.getFileSize());
-            is.transferTo(os);
-        }
+        Resource resource = new InputStreamResource(Files.newInputStream(path));
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(avatar.getMediaType()))
+                .contentLength(avatar.getFileSize())
+                .body(resource);
     }
 
     @GetMapping(value = "/{studentId}/avatar-from-db")
@@ -56,5 +57,12 @@ public class AvatarController {
         headers.setContentType(MediaType.parseMediaType(avatar.getMediaType()));
         headers.setContentLength(avatar.getData().length);
         return ResponseEntity.status(HttpStatus.OK).headers(headers).body(avatar.getData());
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<Avatar>> getAllOfPageAvatar(
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "2") Integer pageSize) {
+        return ResponseEntity.ok(avatarService.findAllAvatars(PageRequest.of(pageNumber, pageSize)));
     }
 }
