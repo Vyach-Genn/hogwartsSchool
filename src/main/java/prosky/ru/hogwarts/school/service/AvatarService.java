@@ -1,6 +1,8 @@
 package prosky.ru.hogwarts.school.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,7 +52,6 @@ public class AvatarService {
         avatar.setFilePath(filePath.toString());
         avatar.setFileSize(avatarFile.getSize());
         avatar.setMediaType(avatarFile.getContentType());
-
         avatar.setData(generateImageData(filePath));
 
         avatarRepository.save(avatar);
@@ -80,5 +81,9 @@ public class AvatarService {
 
     private String getExtensions(String fileName) {
         return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+
+    public Page<Avatar> findAllAvatars(Pageable pageable) {
+        return avatarRepository.findAll(pageable);
     }
 }

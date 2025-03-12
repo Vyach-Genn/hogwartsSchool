@@ -44,16 +44,6 @@ class SchoolHogwartsFacultyForTestRestTemplateApplicationTest {
         Assertions.assertThat(response).contains("\"id\":" + facultyId);
     }
 
-    /*@Test
-    void testGetFacultyByIdNotFound() {
-        Long facultyId = 100000L;
-        String url = BASE_URL + port + "/faculty?id=" + facultyId;
-
-        ResponseEntity<String> response = this.restTemplate.getForEntity(url, String.class);
-
-        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }*/
-
     @Test
     void testGetfacultyByColor() {
         String color = "red";

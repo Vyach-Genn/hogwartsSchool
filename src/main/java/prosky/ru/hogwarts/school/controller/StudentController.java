@@ -7,6 +7,8 @@ import prosky.ru.hogwarts.school.model.Faculty;
 import prosky.ru.hogwarts.school.model.Student;
 import prosky.ru.hogwarts.school.service.StudentService;
 
+import java.util.List;
+
 @RequestMapping("student")
 @RestController
 @AllArgsConstructor
@@ -54,5 +56,20 @@ public class StudentController {
     public ResponseEntity<Void> deleteStudent(@PathVariable Long studentId) {
         studentService.deleteStudent(studentId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> countAllStudents() {
+        return ResponseEntity.ok(studentService.getCountAllStudents());
+    }
+
+    @GetMapping("/average")
+    public ResponseEntity<Double> getAverageAgeOfAllStudents() {
+        return ResponseEntity.ok(studentService.getAverageAgeOfAllStudents());
+    }
+
+    @GetMapping("/limit_5")
+    public ResponseEntity<List<Student>> getTop5ByOrderByIdDesc() {
+        return ResponseEntity.ok(studentService.getTop5ByOrderById().stream().toList());
     }
 }

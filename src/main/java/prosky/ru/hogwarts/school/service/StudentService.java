@@ -58,6 +58,18 @@ public class StudentService {
         return faculty;
     }
 
+    public Long getCountAllStudents() {
+        return studentRepository.findCountAllStudents();
+    }
+
+    public Double getAverageAgeOfAllStudents() {
+        return studentRepository.findAverageAgeOfAllStudents();
+    }
+
+    public Collection<Student> getTop5ByOrderById() {
+        return studentRepository.findTop5ByOrderByIdDesc();
+    }
+
     public void checkStudentExists(Long id) {
         if (!studentRepository.existsById(id)) {
             throw new NotFoundException("Error: Студент с id " + id + " не найден");
