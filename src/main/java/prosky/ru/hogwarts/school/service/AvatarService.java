@@ -1,5 +1,7 @@
 package prosky.ru.hogwarts.school.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,8 +25,10 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 @Service
 public class AvatarService {
 
-    AvatarRepository avatarRepository;
-    StudentService studentService;
+    private static final Logger logger = LoggerFactory.getLogger(AvatarService.class);
+
+    private final AvatarRepository avatarRepository;
+    private final StudentService studentService;
     @Value("${path.to.avatars.folder}")
     private String avatarsDir;
 
@@ -34,6 +38,8 @@ public class AvatarService {
     }
 
     public void uploadAvatar(Long studentId, MultipartFile avatarFile) throws IOException {
+        logger.info("the method to attach an Avatar to a student was called");
+
         Student student = studentService.getStudentById(studentId);
 
         Path filePath = Path.of(avatarsDir, studentId + "." + getExtensions(avatarFile.getOriginalFilename()));
@@ -55,9 +61,11 @@ public class AvatarService {
         avatar.setData(generateImageData(filePath));
 
         avatarRepository.save(avatar);
+        logger.info("Avatar is attached to the student");
     }
 
     private byte[] generateImageData(Path filePath) throws IOException {
+        logger.info("the method to reduce the avatar was called");
         try (InputStream is = Files.newInputStream(filePath);
              BufferedInputStream bis = new BufferedInputStream(is, 1024);
              ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -76,6 +84,7 @@ public class AvatarService {
     }
 
     public Avatar findAvatar(Long studentId) {
+        logger.info("the method to display the avatar of the student was called");
         return avatarRepository.findAvatarByStudentId(studentId).orElse(new Avatar());
     }
 
@@ -84,6 +93,7 @@ public class AvatarService {
     }
 
     public Page<Avatar> findAllAvatars(Pageable pageable) {
+        logger.info("the method to display all avatars was called");
         return avatarRepository.findAll(pageable);
     }
 }
