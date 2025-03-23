@@ -12,7 +12,7 @@ public class IntController {
 
     private final IntService intService;
 
-    @GetMapping
+    @GetMapping(value = "/suggestedOption")
     public ResponseEntity<Long> findTheStream() {
         return ResponseEntity.ok(intService.findTheStream());
     }
