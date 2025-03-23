@@ -16,7 +16,6 @@ import java.util.Set;
 public class FacultyController {
 
     private final FacultyService facultyService;
-    private final FacultyRepository facultyRepository;
 
     @PostMapping
     public ResponseEntity<Faculty> createFaculty(@RequestBody Faculty faculty) {
@@ -57,4 +56,11 @@ public class FacultyController {
         facultyService.deleteFaculty(facultyId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping(value = "/londName")
+    public ResponseEntity<String> getTheLongestFacultyName() {
+        return ResponseEntity.ok(facultyService.getTheLongestFacultyName());
+    }
+
+
 }

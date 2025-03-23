@@ -7,7 +7,7 @@ import prosky.ru.hogwarts.school.model.Faculty;
 import prosky.ru.hogwarts.school.model.Student;
 import prosky.ru.hogwarts.school.service.StudentService;
 
-import java.util.List;
+import java.util.Collection;
 
 @RequestMapping("student")
 @RestController
@@ -69,7 +69,17 @@ public class StudentController {
     }
 
     @GetMapping("/limit_5")
-    public ResponseEntity<List<Student>> getTop5ByOrderByIdDesc() {
-        return ResponseEntity.ok(studentService.getTop5ByOrderById().stream().toList());
+    public ResponseEntity<Collection<Student>> getTop5ByOrderByIdDesc() {
+        return ResponseEntity.ok(studentService.getTop5ByOrderById());
+    }
+
+    @GetMapping(value = "A")
+    public ResponseEntity<Collection<String>> getStudentsNamesStartingWithA() {
+        return ResponseEntity.ok(studentService.getStudentsNamesStartingWithA());
+    }
+
+    @GetMapping(value = "/ave")
+    public ResponseEntity<Double> getAveAgeOfAllStudent() {
+        return ResponseEntity.ok(studentService.getAveAgeOfAllStudents());
     }
 }

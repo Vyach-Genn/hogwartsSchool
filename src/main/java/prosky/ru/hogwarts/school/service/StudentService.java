@@ -9,6 +9,7 @@ import prosky.ru.hogwarts.school.model.Student;
 import prosky.ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
@@ -83,8 +84,10 @@ public class StudentService {
     }
 
     public Collection<Student> getTop5ByOrderById() {
-        logger.info("the method was called to find five students");
-        return studentRepository.findTop5ByOrderByIdDesc();
+        logger.info("The method was called to find five students");
+        return studentRepository.findTop5ByOrderByIdDesc()
+                .stream()
+                .toList();
     }
 
     public void checkStudentExists(Long id) {
@@ -92,6 +95,26 @@ public class StudentService {
         if (!studentRepository.existsById(id)) {
             throw new NotFoundException("Error: Студент с id " + id + " не найден");
         }
+    }
+
+    public Collection<String> getStudentsNamesStartingWithA() {
+        logger.info("The method was sorts the list of students with letter A");
+        return studentRepository.findAll()
+                .stream()
+                .filter(student -> student.getName().startsWith("A"))
+                .map(student -> student.getName().toUpperCase())
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    public Double getAveAgeOfAllStudents() {
+        logger.info("a method was called for calculating the average age of students in using stream");
+        Collection<Student> students = studentRepository.findAll();
+        double totalAge = students
+                .stream()
+                .mapToDouble(Student :: getAge)
+                .sum();
+        return totalAge / students.size();
     }
 }
 
