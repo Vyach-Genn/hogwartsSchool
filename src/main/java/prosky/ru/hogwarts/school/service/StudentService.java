@@ -112,7 +112,7 @@ public class StudentService {
         Collection<Student> students = studentRepository.findAll();
         double totalAge = students
                 .stream()
-                .mapToDouble(Student :: getAge)
+                .mapToDouble(Student::getAge)
                 .sum();
         return totalAge / students.size();
     }
