@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Service
@@ -11,7 +12,7 @@ public class IntService {
 
     private static final Logger logger = LoggerFactory.getLogger(IntService.class);
 
-    public Long findTheStream() {//Calculation findTheStream 55383200 nanoseconds
+    public Long findTheStream() {//Calculation findTheStream 44912600 nanoseconds
         logger.info("Start the Stream");
         long startTime = System.nanoTime();
 
@@ -26,15 +27,15 @@ public class IntService {
         return sum;
     }
 
-    public Long findTheFastestStream() {//Calculation findTheFastestStream 85582000 nanoseconds
-        logger.info("Let's start the Stream");
+    public Long findTheFastestStream() {//Calculation findTheFastestStream 8961100 nanoseconds
+        logger.info("Start the parallel Stream");
         long startTime = System.nanoTime();
 
-        long sum = Stream
-                .iterate(1L, a -> a + 1)
-                .limit(1_000_000)
+        long sum = IntStream
+                .rangeClosed(1, 1_000_000)
                 .parallel()
-                .reduce(0L, Long::sum);
+                .asLongStream()
+                .sum();
 
         long endTime = System.nanoTime();
         long duration = endTime - startTime;
@@ -43,7 +44,7 @@ public class IntService {
         return sum;
     }
 
-    public Long getSum() {//Calculation calculateSum 300 nanoseconds
+    public Long getSum() {//Calculation calculateSum 500 nanoseconds
         logger.info("Was invoked method for calculating the sum of numbers from 1 to 1,000,000");
         int n = 1_000_000;
         return calculateSum(n);
