@@ -82,4 +82,14 @@ public class StudentController {
     public ResponseEntity<Double> getAveAgeOfAllStudent() {
         return ResponseEntity.ok(studentService.getAveAgeOfAllStudents());
     }
+
+    @GetMapping(value = "/print-parallel")
+    public ResponseEntity<String> printStudentsParallel() {
+        return ResponseEntity.ok(studentService.printStudentsParallel());
+    }
+
+    @GetMapping(value = "/print-synchronized")
+    public ResponseEntity<String> printStudentSynchronizedParallel() {
+        return ResponseEntity.ok(studentService.printStudentsSynchronizedParallel());
+    }
 }
