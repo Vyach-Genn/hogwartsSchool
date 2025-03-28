@@ -73,9 +73,9 @@ class SchoolHogwartsFacultyWebMvcApplicationTest {
                         .param("facultyId", faculty.getId().toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(faculty.getId()))
-                .andExpect(jsonPath("$.name").value(faculty.getName()))
-                .andExpect(jsonPath("$.color").value(faculty.getColor()));
+                .andExpect(jsonPath("$[0].id").value(faculty.getId()))
+                .andExpect(jsonPath("$[0].name").value(faculty.getName()))
+                .andExpect(jsonPath("$[0].color").value(faculty.getColor()));
     }
 
     @Test

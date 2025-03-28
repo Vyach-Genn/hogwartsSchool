@@ -8,6 +8,8 @@ import prosky.ru.hogwarts.school.model.Faculty;
 import prosky.ru.hogwarts.school.model.Student;
 import prosky.ru.hogwarts.school.repository.FacultyRepository;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -72,5 +74,15 @@ public class FacultyService {
         if (!facultyRepository.existsById(id)) {
             throw new NotFoundException("Error: Факультет с id " + id + " не найден");
         }
+    }
+
+    public String getTheLongestFacultyName() {
+        Collection<Faculty> faculties = facultyRepository.findAll();
+        return faculties
+                .stream()
+                .map(Faculty::getName)
+                .max(Comparator.comparingInt(String::length))
+                .orElse(null);
+
     }
 }

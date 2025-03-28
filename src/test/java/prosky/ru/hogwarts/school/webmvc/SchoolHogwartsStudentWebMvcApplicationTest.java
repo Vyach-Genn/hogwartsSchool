@@ -12,17 +12,18 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import prosky.ru.hogwarts.school.controller.StudentController;
 import prosky.ru.hogwarts.school.model.Student;
 import prosky.ru.hogwarts.school.repository.StudentRepository;
-import prosky.ru.hogwarts.school.service.AvatarService;
 import prosky.ru.hogwarts.school.service.StudentService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(StudentController.class)
 class SchoolHogwartsStudentWebMvcApplicationTest {
@@ -35,9 +36,6 @@ class SchoolHogwartsStudentWebMvcApplicationTest {
 
     @SpyBean
     private StudentService studentService;
-
-    @MockBean
-    private AvatarService avatarService;
 
     @Test
     public void postStudentTest() throws Exception {
@@ -72,23 +70,18 @@ class SchoolHogwartsStudentWebMvcApplicationTest {
         String name = "Bob";
         int age = 20;
 
-        Student student = new Student();
-
-        student.setId(id);
-        student.setName(name);
-        student.setAge(age);
+        Student student = new Student(id, name, age);
 
         when(studentRepository.existsById(id)).thenReturn(true);
         when(studentRepository.findById(id)).thenReturn(Optional.of(student));
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/student")
+        mockMvc.perform(get("/student")
                         .param("id", id.toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.name").value(name))
-                .andExpect(jsonPath("$.age").value(age));
+                .andExpect(jsonPath("$[0].id").value(id))
+                .andExpect(jsonPath("$[0].name").value(name))
+                .andExpect(jsonPath("$[0].age").value(age));
     }
 
     @Test
@@ -97,8 +90,7 @@ class SchoolHogwartsStudentWebMvcApplicationTest {
 
         when(studentRepository.findById(id)).thenReturn(Optional.empty());
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/student")
+        mockMvc.perform(get("/student")
                         .param("id", id.toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -151,8 +143,7 @@ class SchoolHogwartsStudentWebMvcApplicationTest {
 
         when(studentRepository.findAll()).thenReturn(List.of(student1, student2));
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/student")
+        mockMvc.perform(get("/student")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
@@ -168,8 +159,7 @@ class SchoolHogwartsStudentWebMvcApplicationTest {
     void testCountAllStudents() throws Exception {
         when(studentService.getCountAllStudents()).thenReturn(20L);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/student/count")
+        mockMvc.perform(get("/student/count")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(20L));
@@ -179,8 +169,7 @@ class SchoolHogwartsStudentWebMvcApplicationTest {
     void testgetAverageAgeOfAllStudents() throws Exception {
         when(studentService.getAverageAgeOfAllStudents()).thenReturn(9.0);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/student/average")
+        mockMvc.perform(get("/student/average")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(9.0));
@@ -198,8 +187,7 @@ class SchoolHogwartsStudentWebMvcApplicationTest {
 
         when(studentService.getTop5ByOrderById()).thenReturn(students);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/student/limit_5")
+        mockMvc.perform(get("/student/limit_5")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(5))
@@ -207,5 +195,39 @@ class SchoolHogwartsStudentWebMvcApplicationTest {
                 .andExpect(jsonPath("$[0].name").value("Harry Potter"))
                 .andExpect(jsonPath("$[1].name").value("Hermione Granger"))
                 .andExpect(jsonPath("$[4].name").value("Neville Longbottom"));
+    }
+
+    @Test
+    void testPrintStudentsParallel() throws Exception {
+        when(studentService.printStudentsParallel()).thenReturn("Запущены параллельные потоки для вывода студентов");
+
+        mockMvc.perform(get("/student/print-parallel"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Запущены параллельные потоки для вывода студентов"));
+    }
+
+    @Test
+    void printParallel_ShouldReturnBadRequest_WhenNotEnoughStudents() throws Exception {
+        when(studentRepository.find6StudentByOrder()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/student/print-parallel"))
+                .andExpect(content().string(containsString("Недостаточно студентов")));
+    }
+
+    @Test
+    void testPrintStudentsSynchronizedParallel() throws Exception {
+        when(studentService.printStudentsSynchronizedParallel()).thenReturn("Запущен синхронизированный вывод студентов");
+
+        mockMvc.perform(get("/student/print-synchronized"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Запущен синхронизированный вывод студентов"));
+    }
+
+    @Test
+    void printSynchronized_ShouldReturnBadRequest_WhenNotEnoughStudents() throws Exception {
+        when(studentRepository.find6StudentByOrder()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/student/print-synchronized"))
+                .andExpect(content().string(containsString("Недостаточно студентов")));
     }
 }
