@@ -70,11 +70,7 @@ class SchoolHogwartsStudentWebMvcApplicationTest {
         String name = "Bob";
         int age = 20;
 
-        Student student = new Student();
-
-        student.setId(id);
-        student.setName(name);
-        student.setAge(age);
+        Student student = new Student(id, name, age);
 
         when(studentRepository.existsById(id)).thenReturn(true);
         when(studentRepository.findById(id)).thenReturn(Optional.of(student));
@@ -83,9 +79,9 @@ class SchoolHogwartsStudentWebMvcApplicationTest {
                         .param("id", id.toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.name").value(name))
-                .andExpect(jsonPath("$.age").value(age));
+                .andExpect(jsonPath("$[0].id").value(id))
+                .andExpect(jsonPath("$[0].name").value(name))
+                .andExpect(jsonPath("$[0].age").value(age));
     }
 
     @Test

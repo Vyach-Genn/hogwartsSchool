@@ -13,17 +13,17 @@ public class IntController {
     private final IntService intService;
 
     @GetMapping(value = "/suggestedOption")
-    public ResponseEntity<Long> findTheStream() {
-        return ResponseEntity.ok(intService.findTheStream());
+    public Long findTheStream() {
+        return intService.findTheStream();
     }
 
     @GetMapping(value = "/accelerator")
-    public ResponseEntity<Long> findTheFastestStream() {
-        return ResponseEntity.ok(intService.findTheFastestStream());
+    public Long findTheFastestStream() {
+        return intService.findTheFastestStream();
     }
 
     @GetMapping(value = "/formula")
-    public ResponseEntity<Long> getSum() {
-        return ResponseEntity.ok(intService.getSum());
+    public Long getSum() {
+        return intService.getSum();
     }
 }
