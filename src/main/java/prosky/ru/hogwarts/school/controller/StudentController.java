@@ -2,7 +2,6 @@ package prosky.ru.hogwarts.school.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import prosky.ru.hogwarts.school.model.Faculty;
 import prosky.ru.hogwarts.school.model.Student;
@@ -26,9 +25,9 @@ public class StudentController {
 
     @GetMapping
     public Collection<Student> getStudent(@RequestParam(required = false) Long id,
-                                     @RequestParam(required = false) Integer age,
-                                     @RequestParam(required = false) Integer minAge,
-                                     @RequestParam(required = false) Integer maxAge) {
+                                          @RequestParam(required = false) Integer age,
+                                          @RequestParam(required = false) Integer minAge,
+                                          @RequestParam(required = false) Integer maxAge) {
         if (id != null) {
             Student student = studentService.getStudentById(id);
             return Collections.singletonList(student);
