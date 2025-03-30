@@ -9,6 +9,8 @@ import prosky.ru.hogwarts.school.model.Student;
 import prosky.ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
@@ -83,8 +85,10 @@ public class StudentService {
     }
 
     public Collection<Student> getTop5ByOrderById() {
-        logger.info("the method was called to find five students");
-        return studentRepository.findTop5ByOrderByIdDesc();
+        logger.info("The method was called to find five students");
+        return studentRepository.findTop5ByOrderByIdDesc()
+                .stream()
+                .toList();
     }
 
     public void checkStudentExists(Long id) {
@@ -92,6 +96,86 @@ public class StudentService {
         if (!studentRepository.existsById(id)) {
             throw new NotFoundException("Error: Студент с id " + id + " не найден");
         }
+    }
+
+    public Collection<String> getStudentsNamesStartingWithA() {
+        logger.info("The method was sorts the list of students with letter A");
+        return studentRepository.findAll()
+                .stream()
+                .filter(student -> student.getName().startsWith("A"))
+                .map(student -> student.getName().toUpperCase())
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    public Double getAveAgeOfAllStudents() {
+        logger.info("a method was called for calculating the average age of students in using stream");
+        Collection<Student> students = studentRepository.findAll();
+        double totalAge = students
+                .stream()
+                .mapToDouble(Student::getAge)
+                .sum();
+        return totalAge / students.size();
+    }
+
+    public String printStudentsParallel() {
+        List<Student> students = studentRepository.find6StudentByOrder();
+
+        if (students.size() < 6) {
+            logger.warn("Недостаточно студентов в базе: {}", students.size());
+            return "Недостаточно студентов для выполнения операции";
+        }
+
+        logger.info("Main thread started");
+        System.out.println(students.get(0).getId() + " (main thread) " + students.get(0).getName());
+        System.out.println(students.get(1).getId() + " (main thread) " + students.get(1).getName());
+
+        Thread thread1 = new Thread(() -> {
+            logger.info("Parallel thread 1 started");
+            System.out.println(students.get(2).getId() + " (thread1) " + students.get(2).getName());
+            System.out.println(students.get(3).getId() + " (thread1) " + students.get(3).getName());
+        });
+        thread1.start();
+
+        Thread thread2 = new Thread(() -> {
+            logger.info("Parallel thread 2 started");
+            System.out.println(students.get(4).getId() + " (thread2) " + students.get(4).getName());
+            System.out.println(students.get(5).getId() + " (thread2) " + students.get(5).getName());
+        });
+        thread2.start();
+        return "Parallel thread";
+    }
+
+    public String printStudentsSynchronizedParallel() {
+        List<Student> students = studentRepository.find6StudentByOrder();
+
+        if (students.size() < 6) {
+            logger.warn("Недостаточно студентов в базе: {}", students.size());
+            return "Недостаточно студентов для выполнения операции";
+        }
+
+        logger.info("Main synchronized thread started");
+        printStudentSynchronized(students.get(0), "main thread");
+        printStudentSynchronized(students.get(1), "main thread");
+
+        Thread thread1 = new Thread(() -> {
+            logger.info("Parallel synchronized thread 1 started");
+            printStudentSynchronized(students.get(2), "thread1");
+            printStudentSynchronized(students.get(3), "thread1");
+        });
+        thread1.start();
+
+        Thread thread2 = new Thread(() -> {
+            logger.info("Parallel synchronized thread 2 started");
+            printStudentSynchronized(students.get(4), "thread2");
+            printStudentSynchronized(students.get(5), "thread2");
+        });
+        thread2.start();
+        return "Parallel synchronized thread";
+    }
+
+    private synchronized void printStudentSynchronized(Student student, String threadName) {
+        System.out.println(student.getId() + " (" + threadName + ") " + student.getName());
     }
 }
 

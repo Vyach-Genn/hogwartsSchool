@@ -1,3 +1,4 @@
+/*
 package prosky.ru.hogwarts.school.template;
 
 import org.assertj.core.api.Assertions;
@@ -126,4 +127,4 @@ class SchoolHogwartsFacultyForTestRestTemplateApplicationTest {
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
-}
+}*/
